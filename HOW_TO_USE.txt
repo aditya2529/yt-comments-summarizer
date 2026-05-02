@@ -1,0 +1,162 @@
+============================================================
+  CommentLens - How To Use
+  YouTube Comment Summarizer powered by AI
+============================================================
+
+Welcome! This guide walks you through everything:
+getting your API keys, setting up, and using the app.
+
+------------------------------------------------------------
+  WHAT ARE API KEYS AND WHY DO I NEED THEM?
+------------------------------------------------------------
+
+CommentLens needs permission from two services:
+
+  1. YouTube - to read the comments on any video
+  2. Anthropic (Claude AI) - to understand and summarize them
+
+These permissions come in the form of "API keys" - think of
+them as passwords that belong to YOUR account. Getting them
+takes about 10 minutes and is a one-time task.
+
+
+------------------------------------------------------------
+  KEY 1: YouTube API Key (100% Free)
+------------------------------------------------------------
+
+  1. Open your browser and go to:
+     https://console.cloud.google.com/
+
+  2. Sign in with your Google / Gmail account.
+
+  3. At the top of the page, click "Select a project",
+     then click "New Project" in the window that appears.
+
+  4. Type any name (e.g. CommentLens) and click "Create".
+
+  5. In the search bar at the very top of the page, type:
+        YouTube Data API v3
+     and press Enter.
+
+  6. Click the result that says "YouTube Data API v3",
+     then click the blue "Enable" button.
+
+  7. On the left sidebar, click "Credentials".
+
+  8. Click "+ Create Credentials" near the top,
+     then choose "API key" from the dropdown.
+
+  9. A box will pop up with your key. It looks like:
+        AIzaSyABC123...
+     Copy it and paste it into Notepad to save it.
+
+ 10. When SETUP.bat asks for your YOUTUBE_API_KEY,
+     paste this key in.
+
+
+------------------------------------------------------------
+  KEY 2: Anthropic API Key (About $0.01 per summary)
+------------------------------------------------------------
+
+  New accounts get free credits to start.
+  Normal use costs about $5 for 500+ summaries.
+
+  1. Open your browser and go to:
+     https://console.anthropic.com/
+
+  2. Click "Sign Up" and create an account.
+
+  3. Once logged in, click "API Keys" in the left sidebar.
+
+  4. Click "Create Key" and give it a name (e.g. CommentLens).
+
+  5. Your key appears ONLY ONCE. It looks like:
+        sk-ant-api03-...
+     Copy it immediately and paste it into Notepad.
+
+  6. To add payment (required after free credits run out):
+     - Click your account name (top right corner)
+     - Go to "Billing"
+     - Add a small amount like $5 or $10
+
+  7. When SETUP.bat asks for your ANTHROPIC_API_KEY,
+     paste this key in.
+
+
+------------------------------------------------------------
+  FIRST-TIME SETUP (do this once only)
+------------------------------------------------------------
+
+  1. Double-click SETUP.bat
+  2. If Python is not installed, it will open the download
+     page for you - follow the on-screen instructions.
+     IMPORTANT: Tick "Add Python to PATH" during install!
+  3. If Node.js is not installed, it will open the download
+     page for you - accept all defaults during install.
+  4. Dependencies will be installed automatically.
+  5. When asked for your API keys, paste each one in and
+     press Enter.
+  6. You will see "Setup complete!" when it is done.
+
+
+------------------------------------------------------------
+  USING THE APP EVERY DAY
+------------------------------------------------------------
+
+  1. Double-click START.bat
+  2. Two small windows will appear in your taskbar -
+     leave them open (they run the app in the background).
+  3. After about 10-15 seconds, your browser opens
+     automatically with CommentLens.
+  4. Paste any YouTube video URL into the box.
+  5. Click "Summarize" and wait 10-20 seconds.
+  6. Enjoy your full AI-powered comment summary!
+
+
+------------------------------------------------------------
+  STOPPING THE APP WHEN YOU ARE DONE
+------------------------------------------------------------
+
+  1. Double-click STOP.bat
+  2. Press any key when prompted.
+  3. Close the two "CommentLens" windows in your taskbar.
+
+  Tip: You can also just shut down your computer -
+  that stops everything too.
+
+
+------------------------------------------------------------
+  TROUBLESHOOTING
+------------------------------------------------------------
+
+  "The browser opened but the page doesn't load"
+  -> Wait another 15 seconds and refresh (press F5).
+     The backend may still be starting up.
+
+  "Error about invalid API key"
+  -> Run SETUP.bat again and re-enter your keys carefully.
+     Make sure you copied the full key with no extra spaces.
+
+  "The app was working before but won't start now"
+  -> Run STOP.bat first, wait 10 seconds, then START.bat.
+
+  "Port already in use" warning at startup
+  -> Run STOP.bat, wait 10 seconds, then try START.bat.
+
+  "I need to update my API keys"
+  -> Just run SETUP.bat again. It will replace the old keys.
+
+
+------------------------------------------------------------
+  YOUR FILES AT A GLANCE
+------------------------------------------------------------
+
+  SETUP.bat        Run once to set everything up.
+  START.bat        Double-click every time to open the app.
+  STOP.bat         Shuts the app down cleanly.
+  HOW_TO_USE.txt   This file. Keep it handy!
+
+  backend\         The server code (do not edit).
+  frontend\        The website code (do not edit).
+
+============================================================
