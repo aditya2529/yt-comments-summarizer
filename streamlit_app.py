@@ -40,7 +40,7 @@ with st.sidebar:
         st.success("Keys saved! They'll load automatically next time.")
 
     st.divider()
-    max_comments = st.slider("Max comments to analyse", 50, 500, 200, step=50)
+    max_comments = st.slider("Max comments to fetch", 200, 2000, 500, step=100)
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def extract_video_id(url: str) -> str:
@@ -100,9 +100,33 @@ def fetch_comments(video_id: str, api_key: str, max_n: int) -> list[str]:
     return comments
 
 
+def smart_sample(comments: list[str], target: int = 500) -> list[str]:
+    """Pick the most representative comments:
+    - Top 60% by like count (most engaged)
+    - Random 40% from the rest (diversity)
+    """
+    import random
+    if len(comments) <= target:
+        return comments
+
+    def get_likes(c):
+        try:
+            return int(re.search(r"\[(\d+) likes\]", c).group(1))
+        except:
+            return 0
+
+    sorted_by_likes = sorted(comments, key=get_likes, reverse=True)
+    top_count = int(target * 0.6)
+    rest_count = target - top_count
+    top = sorted_by_likes[:top_count]
+    rest = random.sample(sorted_by_likes[top_count:], min(rest_count, len(sorted_by_likes) - top_count))
+    return top + rest
+
+
 def analyse_with_groq(comments: list[str], title: str, channel: str, api_key: str) -> dict:
     client = Groq(api_key=api_key)
-    comments_text = "\n".join(f"- {c}" for c in comments[:200])
+    sampled = smart_sample(comments, target=500)
+    comments_text = "\n".join(f"- {c}" for c in sampled)
 
     prompt = f"""Analyze the YouTube comments below for the video "{title}" by {channel}.
 
@@ -174,7 +198,8 @@ if st.button("✨ Summarise Comments", type="primary", use_container_width=True)
         st.error("No comments found — comments may be disabled.")
         st.stop()
 
-    st.info(f"Analysing **{len(comments)}** comments with Groq (Llama 3.3 70B)...")
+    sample_size = min(500, len(comments))
+    st.info(f"Fetched **{len(comments)}** comments — analysing a smart sample of **{sample_size}** with Groq (Llama 3.3 70B)...")
 
     with st.spinner("Generating insights..."):
         result = analyse_with_groq(comments, meta["title"], meta["channel"], groq_key)
