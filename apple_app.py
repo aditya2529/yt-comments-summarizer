@@ -98,11 +98,7 @@ def smart_sample(comments: list[str], target: int = 500) -> list[str]:
 
 def analyse_with_groq(comments: list[str], title: str, channel: str, api_key: str) -> dict:
     client = Groq(api_key=api_key)
-    # Llama 3.3 70B on Groq has a 128k token context window. We cap at 1500
-    # comments (~60-80k tokens) to leave room for the prompt + response and
-    # avoid context-overflow errors. If user fetched fewer, use them all.
-    target = min(1500, len(comments))
-    sampled = smart_sample(comments, target=target)
+    sampled = smart_sample(comments, target=500)
     comments_text = "\n".join(f"- {c}" for c in sampled)
 
     prompt = f"""Analyze the YouTube comments below for the video "{title}" by {channel}.
@@ -628,8 +624,7 @@ with st.sidebar:
         st.success("Saved to .env")
 
     st.markdown("---")
-    max_comments = st.slider("Max comments to fetch", 200, 3000, 1000, step=100, key="apple_max")
-    st.caption(f"Up to {min(1500, max_comments)} will be sent to the AI for analysis.")
+    max_comments = st.slider("Max comments to fetch", 200, 2000, 500, step=100, key="apple_max")
 
 # ── HERO + INPUT (same centered column = same vertical axis) ─────────────────
 hero_l, hero_c, hero_r = st.columns([1, 4, 1], gap="small")
@@ -752,7 +747,17 @@ if go:
     st.caption(f"Fetched {len(comments)} comments — analysing {sample_size} with Llama 3.3 70B...")
 
     with st.spinner("Generating insights..."):
-        result = analyse_with_groq(comments, meta["title"], meta["channel"], groq_key)
+        try:
+            result = analyse_with_groq(comments, meta["title"], meta["channel"], groq_key)
+        except Exception as e:
+            err = str(e)
+            if "rate" in err.lower() or "429" in err or "tokens per minute" in err.lower():
+                st.error("⚠️ Groq's free-tier rate limit was hit. Please wait ~1 minute and try again, or use a video with fewer comments.")
+            elif "context" in err.lower() or "too long" in err.lower():
+                st.error("⚠️ This video has too many comments for the AI to process at once. Try lowering the slider.")
+            else:
+                st.error(f"⚠️ AI request failed: {err}")
+            st.stop()
 
     # ── HEADLINE ──────────────────────────────────────────────────────────────
     sentiment = result.get("overall_sentiment", "neutral")

@@ -40,8 +40,7 @@ with st.sidebar:
         st.success("Keys saved! They'll load automatically next time.")
 
     st.divider()
-    max_comments = st.slider("Max comments to fetch", 200, 3000, 1000, step=100)
-    st.caption(f"Up to {min(1500, max_comments)} sent to AI for analysis.")
+    max_comments = st.slider("Max comments to fetch", 200, 2000, 500, step=100)
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def extract_video_id(url: str) -> str:
@@ -126,11 +125,7 @@ def smart_sample(comments: list[str], target: int = 500) -> list[str]:
 
 def analyse_with_groq(comments: list[str], title: str, channel: str, api_key: str) -> dict:
     client = Groq(api_key=api_key)
-    # Llama 3.3 70B on Groq has a 128k token context window. Cap at 1500
-    # comments (~60-80k tokens) to leave room for prompt + response and
-    # avoid context-overflow errors. If user fetched fewer, use them all.
-    target = min(1500, len(comments))
-    sampled = smart_sample(comments, target=target)
+    sampled = smart_sample(comments, target=500)
     comments_text = "\n".join(f"- {c}" for c in sampled)
 
     prompt = f"""Analyze the YouTube comments below for the video "{title}" by {channel}.
@@ -203,11 +198,21 @@ if st.button("✨ Summarise Comments", type="primary", use_container_width=True)
         st.error("No comments found — comments may be disabled.")
         st.stop()
 
-    sample_size = min(1500, len(comments))
+    sample_size = min(500, len(comments))
     st.info(f"Fetched **{len(comments)}** comments — analysing a smart sample of **{sample_size}** with Groq (Llama 3.3 70B)...")
 
     with st.spinner("Generating insights..."):
-        result = analyse_with_groq(comments, meta["title"], meta["channel"], groq_key)
+        try:
+            result = analyse_with_groq(comments, meta["title"], meta["channel"], groq_key)
+        except Exception as e:
+            err = str(e)
+            if "rate" in err.lower() or "429" in err or "tokens per minute" in err.lower():
+                st.error("⚠️ Groq's free-tier rate limit was hit. Please wait ~1 minute and try again, or use a video with fewer comments.")
+            elif "context" in err.lower() or "too long" in err.lower():
+                st.error("⚠️ This video has too many comments for the AI to process at once. Try lowering the slider.")
+            else:
+                st.error(f"⚠️ AI request failed: {err}")
+            st.stop()
 
     st.success("Done!")
     st.divider()
