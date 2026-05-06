@@ -40,7 +40,8 @@ with st.sidebar:
         st.success("Keys saved! They'll load automatically next time.")
 
     st.divider()
-    max_comments = st.slider("Max comments to fetch", 200, 2000, 500, step=100)
+    max_comments = st.slider("Max comments to fetch", 200, 3000, 1000, step=100)
+    st.caption(f"Up to {min(1500, max_comments)} sent to AI for analysis.")
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def extract_video_id(url: str) -> str:
@@ -125,7 +126,11 @@ def smart_sample(comments: list[str], target: int = 500) -> list[str]:
 
 def analyse_with_groq(comments: list[str], title: str, channel: str, api_key: str) -> dict:
     client = Groq(api_key=api_key)
-    sampled = smart_sample(comments, target=500)
+    # Llama 3.3 70B on Groq has a 128k token context window. Cap at 1500
+    # comments (~60-80k tokens) to leave room for prompt + response and
+    # avoid context-overflow errors. If user fetched fewer, use them all.
+    target = min(1500, len(comments))
+    sampled = smart_sample(comments, target=target)
     comments_text = "\n".join(f"- {c}" for c in sampled)
 
     prompt = f"""Analyze the YouTube comments below for the video "{title}" by {channel}.

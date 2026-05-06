@@ -1,9 +1,12 @@
 # Secrets — never commit these
 .env
+.env.local
+.env.production
 backend/.env
 frontend/.env
 frontend/.env.local
 frontend/.env.production
+.streamlit/secrets.toml
 
 # Python
 __pycache__/
