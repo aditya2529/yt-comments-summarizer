@@ -203,7 +203,7 @@ if st.button("✨ Summarise Comments", type="primary", use_container_width=True)
         st.error("No comments found — comments may be disabled.")
         st.stop()
 
-    sample_size = min(500, len(comments))
+    sample_size = min(1500, len(comments))
     st.info(f"Fetched **{len(comments)}** comments — analysing a smart sample of **{sample_size}** with Groq (Llama 3.3 70B)...")
 
     with st.spinner("Generating insights..."):
